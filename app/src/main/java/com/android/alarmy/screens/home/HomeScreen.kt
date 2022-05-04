@@ -1,7 +1,10 @@
 package com.android.alarmy.screens.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
@@ -16,19 +19,31 @@ import androidx.compose.ui.unit.sp
 import com.android.alarmy.components.AlarmCard
 import com.android.alarmy.model.Alarm
 import com.android.alarmy.utils.AppColors
+import java.time.DayOfWeek
 
 @Composable
 fun HomeScreen() {
     val alarmList = listOf<Alarm>(
         Alarm(),
-        Alarm(),
-        Alarm(),
+        Alarm(days = setOf<DayOfWeek>(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.SATURDAY)),
+        Alarm(
+            days = setOf<DayOfWeek>(
+                DayOfWeek.MONDAY,
+                DayOfWeek.TUESDAY,
+                DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY,
+                DayOfWeek.FRIDAY,
+                DayOfWeek.SATURDAY,
+                DayOfWeek.SUNDAY
+            )
+        ),
         Alarm(),
         Alarm(),
         Alarm(),
         Alarm(),
         Alarm(),
     )
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

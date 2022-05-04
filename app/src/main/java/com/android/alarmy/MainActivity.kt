@@ -3,19 +3,24 @@ package com.android.alarmy
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddAlarm
+import androidx.compose.material.icons.outlined.OfflineBolt
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.android.alarmy.components.BottomBar
+import com.android.alarmy.components.FabItem
+import com.android.alarmy.components.FloatingActionButtonState
+import com.android.alarmy.components.MyFloatingActionButton
+import com.android.alarmy.navigation.AlarmyScreens
 import com.android.alarmy.navigation.NavigationGraph
-import com.android.alarmy.screens.BottomBar
-import com.android.alarmy.screens.home.HomeScreen
+import com.android.alarmy.navigation.SubAlarmScreens
 import com.android.alarmy.ui.theme.AlarmyTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,10 +37,60 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AlarmyApp() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    var fabState = remember {
+        mutableStateOf(FloatingActionButtonState.COLLAPSED)
+    }
+    val fabItemList = listOf(
+        FabItem(
+            label = "Quick Alarm",
+            icon = Icons.Outlined.OfflineBolt,
+            onClick = {}
+        ),
+        FabItem(
+            label = "Alarm",
+            icon = Icons.Outlined.AddAlarm,
+            onClick = {
+                navController.navigate(route = SubAlarmScreens.AddAlarmScreen.name)
+            }
+        )
+    )
     Scaffold(
         bottomBar = {
-            BottomBar(navController = navController)
+            when (currentRoute) {
+                AlarmyScreens.Home.route,
+                AlarmyScreens.Record.route,
+                AlarmyScreens.Panel.route,
+                AlarmyScreens.Settings.route
+                -> BottomBar(navController = navController)
+            }
         },
+        floatingActionButton = {
+            when (currentRoute) {
+                AlarmyScreens.Home.route,
+                AlarmyScreens.Record.route,
+                AlarmyScreens.Panel.route,
+                AlarmyScreens.Settings.route
+                -> {
+                    MyFloatingActionButton(
+                        fabItemList = fabItemList,
+                        floatingActionButtonState = fabState.value,
+                        onStateChange = {
+                            fabState.value = it
+                        }
+                    )
+                }
+            }
+
+//            FloatingActionButton(
+//                onClick = {},
+//                backgroundColor = Color.Red,
+//                content = {
+//                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
+//                }
+//            )
+        }
 //        backgroundColor = Color.Cyan
     ) {
         NavigationGraph(navController = navController)
