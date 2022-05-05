@@ -11,18 +11,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.android.alarmy.components.BottomBar
 import com.android.alarmy.components.FabItem
 import com.android.alarmy.components.FloatingActionButtonState
 import com.android.alarmy.components.MyFloatingActionButton
+import com.android.alarmy.data.viewmodel.AlarmViewModel
 import com.android.alarmy.navigation.AlarmyScreens
 import com.android.alarmy.navigation.NavigationGraph
 import com.android.alarmy.navigation.SubAlarmScreens
 import com.android.alarmy.ui.theme.AlarmyTheme
+import com.android.alarmy.utils.AppColors
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,10 +40,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AlarmyApp() {
+    val alarmViewModel = viewModel<AlarmViewModel>()
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    var fabState = remember {
+    val fabState = remember {
         mutableStateOf(FloatingActionButtonState.COLLAPSED)
     }
     val fabItemList = listOf(
@@ -90,17 +95,9 @@ fun AlarmyApp() {
 //                    Icon(imageVector = Icons.Default.Add, contentDescription = null)
 //                }
 //            )
-        }
-//        backgroundColor = Color.Cyan
+        },
+        backgroundColor = AppColors.AliceBlue
     ) {
-        NavigationGraph(navController = navController)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    AlarmyTheme {
-        AlarmyApp()
+        NavigationGraph(navController = navController, alarmViewModel = alarmViewModel )
     }
 }

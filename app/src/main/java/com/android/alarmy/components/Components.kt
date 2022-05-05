@@ -1,5 +1,7 @@
 package com.android.alarmy.components
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
@@ -22,17 +24,21 @@ import com.android.alarmy.model.Alarm
 import com.android.alarmy.utils.AppColors
 import com.android.alarmy.utils.Time
 import java.time.DayOfWeek
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 //@Preview
 @Composable
-fun AlarmCard(alarm: Alarm = Alarm()) {
+fun AlarmCard(context: Context, alarm: Alarm, onDeleteAlarm: (Alarm) -> Unit, onItemClick: (String) -> Unit) {
+    val time = LocalTime.of(alarm.hour, alarm.minute)
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 2.dp)
             .clip(shape = RoundedCornerShape(CornerSize(10.dp)))
-            .clickable { }
+            .clickable {
+                onItemClick(alarm.id.toString())
+            }
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -47,7 +53,7 @@ fun AlarmCard(alarm: Alarm = Alarm()) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = alarm.time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
                     fontWeight = FontWeight.Bold,
                     fontSize = 32.sp
                 )
@@ -102,6 +108,8 @@ fun AlarmCard(alarm: Alarm = Alarm()) {
                     ) {
                         DropdownMenuItem(onClick = {
                             expanded = false
+                            onDeleteAlarm(alarm)
+                            Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show()
 
                         }) {
                             Text("Delete")

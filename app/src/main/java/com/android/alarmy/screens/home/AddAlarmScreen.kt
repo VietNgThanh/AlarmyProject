@@ -1,5 +1,7 @@
 package com.android.alarmy.screens.home
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,10 +12,13 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,19 +27,32 @@ import androidx.navigation.NavController
 import com.android.alarmy.components.AlarmActionCard
 import com.android.alarmy.components.DayOfWeekToggleButton
 import com.android.alarmy.components.MyTimePicker
+import com.android.alarmy.model.Alarm
+import com.android.alarmy.services.AlarmService
 import com.android.alarmy.utils.AppColors
+import com.android.alarmy.utils.Time
 import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.*
 
 @Composable
-fun AddAlarmScreen(navController: NavController) {
+fun AddAlarmScreen(
+    navController: NavController,
+    alarm: Alarm,
+    onSaveAlarm: (Alarm) -> Unit,
+    onDeleteAlarm: (Alarm) -> Unit
+) {
     val dows = EnumSet.allOf(DayOfWeek::class.java)
-
     val scrollState = rememberScrollState()
-
-    var hour = LocalTime.now().hour
-    var minute = LocalTime.now().minute
+    val hourState = remember {
+        mutableStateOf(alarm.hour)
+    }
+    val minuteState = remember {
+        mutableStateOf(alarm.minute)
+    }
+    val context = LocalContext.current
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -65,8 +83,9 @@ fun AddAlarmScreen(navController: NavController) {
             }
 
             if (scrollState.value != 0) {
-                Text(text = "${hour}:${minute}",
-                style = TextStyle(fontSize = 24.sp)
+                Text(
+                    text = "${hourState.value}:${minuteState.value}",
+                    style = TextStyle(fontSize = 24.sp)
                 )
             }
 
@@ -84,12 +103,14 @@ fun AddAlarmScreen(navController: NavController) {
                 .verticalScroll(scrollState)
         ) {
             MyTimePicker(
-                time = LocalTime.of(hour, minute),
+                time = LocalTime.of(hourState.value, minuteState.value),
                 onChangeHour = {
-                    hour = it
+                    hourState.value = it
+//                    Log.d("AddAlarmScreen", "Change hour: ${hourState.value}")
                 },
                 onChangeMinute = {
-                    minute = it
+                    minuteState.value = it
+//                    Log.d("AddAlarmScreen", "Change minute: ${minuteState.value}")
                 }
             )
             Column(
@@ -160,7 +181,11 @@ fun AddAlarmScreen(navController: NavController) {
                     .padding(top = 12.dp)
                     .height(40.dp)
                     .fillMaxWidth(),
-                onClick = { /*TODO*/ }
+                onClick = {
+                    onDeleteAlarm(alarm)
+                    Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                }
             ) {
                 Text(
                     text = "Delete",
@@ -181,7 +206,20 @@ fun AddAlarmScreen(navController: NavController) {
                 .padding(vertical = 12.dp)
                 .height(40.dp)
                 .fillMaxWidth(),
-            onClick = { /*TODO*/ }
+            onClick = {
+                alarm.hour = hourState.value
+                alarm.minute = minuteState.value
+                alarm.state = true
+                Log.d("AddAlarmScreen", "AddAlarmScreen: ${alarm.hour} ${alarm.minute}")
+                onSaveAlarm(alarm)
+                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+
+                val alarmService = AlarmService(context)
+                alarmService.setExactAlarm(
+                    Time.timestampFromLocalDateTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(alarm.hour, alarm.minute, 0, 0)))
+                )
+                navController.popBackStack()
+            }
         ) {
             Text(
                 text = "Save",
