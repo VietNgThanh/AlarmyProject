@@ -1,7 +1,5 @@
 package com.android.alarmy.screens.home
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,6 +12,7 @@ import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
@@ -25,17 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.android.alarmy.components.AlarmActionCard
-import com.android.alarmy.components.DayOfWeekToggleButton
 import com.android.alarmy.components.MyTimePicker
+import com.android.alarmy.components.WeekToggleButotn
 import com.android.alarmy.model.Alarm
 import com.android.alarmy.services.AlarmService
 import com.android.alarmy.utils.AppColors
-import com.android.alarmy.utils.Time
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
 
 @Composable
 fun AddAlarmScreen(
@@ -44,15 +38,23 @@ fun AddAlarmScreen(
     onSaveAlarm: (Alarm) -> Unit,
     onDeleteAlarm: (Alarm) -> Unit
 ) {
-    val dows = EnumSet.allOf(DayOfWeek::class.java)
+    val context = LocalContext.current
+    val alarmService = AlarmService(context)
     val scrollState = rememberScrollState()
+
     val hourState = remember {
         mutableStateOf(alarm.hour)
     }
     val minuteState = remember {
         mutableStateOf(alarm.minute)
     }
-    val context = LocalContext.current
+    var dayRepeatCheckState = remember {
+        mutableStateOf(alarm.days)
+    }
+    var everyDayCheckBoxState = remember {
+        mutableStateOf(!alarm.days.contains(false))
+    }
+
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -90,7 +92,7 @@ fun AddAlarmScreen(
             }
 
             Text(
-                text = "Preview",
+                text = "Xem trước",
                 style = TextStyle(fontSize = 18.sp),
                 modifier = Modifier
             )
@@ -124,13 +126,22 @@ fun AddAlarmScreen(
                         .fillMaxWidth()
 
                 ) {
-                    Text(text = "Repeat")
+                    Text(text = "Lặp lại")
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Every day")
-                        Checkbox(checked = false, onCheckedChange = {})
+                        Text(text = "Hằng ngày")
+                        Checkbox(checked = everyDayCheckBoxState.value,
+                            onCheckedChange = {
+                                everyDayCheckBoxState.value = it
+                                if (it) {
+                                    dayRepeatCheckState.value = List(7) { true }
+                                } else {
+                                    dayRepeatCheckState.value = List(7) { false }
+                                }
+                            }
+                        )
                     }
                 }
                 Row(
@@ -139,9 +150,13 @@ fun AddAlarmScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    dows.forEach {
-                        DayOfWeekToggleButton(dayOfWeek = it, state = false)
-                    }
+                    WeekToggleButotn(checkedList = dayRepeatCheckState.value,
+                        onCheckChange = { index, checked ->
+                            val temp = dayRepeatCheckState.value.toMutableList()
+                            temp[index] = checked
+                            everyDayCheckBoxState.value = !temp.contains(false)
+                            dayRepeatCheckState.value = temp.toMutableStateList()
+                        })
                 }
                 Box(
                     contentAlignment = Center,
@@ -166,9 +181,12 @@ fun AddAlarmScreen(
                     .padding(vertical = 6.dp)
                     .background(AppColors.Solitude)
             )
-            AlarmActionCard(title = "Mission", description = "Off", onClick = {})
-            AlarmActionCard(title = "Snooze", description = "Off", onClick = {})
-            AlarmActionCard(title = "Label", description = "None", onClick = {})
+            AlarmActionCard(
+                title = "Cách tắt báo thcứ",
+                description = alarm.wakeupMission.name,
+                onClick = {})
+            AlarmActionCard(title = "Báo lại", description = "Off", onClick = {})
+            AlarmActionCard(title = "Nhãn", description = "None", onClick = {})
             AlarmActionCard(title = "Label", description = "None", onClick = {})
             AlarmActionCard(title = "Label", description = "None", onClick = {})
             AlarmActionCard(title = "Label", description = "None", onClick = {})
@@ -183,12 +201,11 @@ fun AddAlarmScreen(
                     .fillMaxWidth(),
                 onClick = {
                     onDeleteAlarm(alarm)
-                    Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show()
                     navController.popBackStack()
                 }
             ) {
                 Text(
-                    text = "Delete",
+                    text = "Xoá",
                     style = TextStyle(
                         fontWeight = FontWeight.Bold,
                         color = AppColors.Mischka,
@@ -207,22 +224,23 @@ fun AddAlarmScreen(
                 .height(40.dp)
                 .fillMaxWidth(),
             onClick = {
+                alarmService.cancelAlarm(alarm)
                 alarm.hour = hourState.value
                 alarm.minute = minuteState.value
                 alarm.state = true
-                Log.d("AddAlarmScreen", "AddAlarmScreen: ${alarm.hour} ${alarm.minute}")
-                onSaveAlarm(alarm)
-                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+                alarm.days = dayRepeatCheckState.value
+//                Log.d("AddAlarmScreen", "AddAlarmScreen: ${alarm.hour} ${alarm.minute}")
+//                onSaveAlarm(alarm)
+//                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+//
+                alarmService.autoSetAlarm(alarm)
 
-                val alarmService = AlarmService(context)
-                alarmService.setExactAlarm(
-                    Time.timestampFromLocalDateTime(LocalDateTime.of(LocalDate.now(), LocalTime.of(alarm.hour, alarm.minute, 0, 0)))
-                )
+                onSaveAlarm(alarm)
                 navController.popBackStack()
             }
         ) {
             Text(
-                text = "Save",
+                text = "Lưu",
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     color = Color.White,

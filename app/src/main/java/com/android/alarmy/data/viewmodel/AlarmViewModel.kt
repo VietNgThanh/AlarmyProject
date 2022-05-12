@@ -22,7 +22,7 @@ class AlarmViewModel @Inject constructor(private val repository: AlarmRepository
         viewModelScope.launch(Dispatchers.IO) {
             repository.getAllAlarms().distinctUntilChanged().collect() {
                 it.let {
-                    _alarmList.value = it
+                    _alarmList.value = sortAlarm(it)
                 }
             }
         }
@@ -31,7 +31,38 @@ class AlarmViewModel @Inject constructor(private val repository: AlarmRepository
     fun addAlarm(alarm: Alarm) = viewModelScope.launch { repository.addAlarm(alarm) }
     fun updateAlarm(alarm: Alarm) = viewModelScope.launch { repository.updateAlarm(alarm) }
     fun deleteAlarm(alarm: Alarm) = viewModelScope.launch { repository.deleteAlarm(alarm) }
-//    fun findAlarmById(id: String) = viewModelScope.launch {
-//        singleAlarm = repository.findAlarmById(id)
+
+//    fun changeTaskChecked(alarm: Alarm, checked: Boolean) = viewModelScope.launch {
+//        _alarmList.value.find {
+//            it.id == alarm.id
+//        }?.let {
+//            it.state = checked
+//            repository.updateAlarm(it)
+//        }
 //    }
+
+    fun changeTaskChecked(alarmId: String, checked: Boolean) = viewModelScope.launch {
+        val alarm = findAlarmById(alarmId) ?: return@launch
+        alarm.state = checked
+        updateAlarm(alarm)
+    }
+
+    fun findAlarmById(alarmId: String): Alarm? =
+        _alarmList.value.find {
+            it.id.toString() == alarmId
+        }
+
+    private fun sortAlarm(alarmList: List<Alarm>): List<Alarm> {
+        return alarmList.sortedWith(compareBy<Alarm> {
+            it.state
+        }
+            .reversed()
+            .thenBy { it.hour }
+            .thenBy { it.minute }
+        )
+    }
+
+    fun findNextAlarm(): Alarm {
+        TODO("Not yet implemented")
+    }
 }

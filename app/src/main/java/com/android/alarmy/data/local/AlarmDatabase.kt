@@ -7,7 +7,7 @@ import com.android.alarmy.model.Alarm
 import com.android.alarmy.utils.converter.DayOfWeekSetConverter
 import com.android.alarmy.utils.converter.UUIDConverter
 
-@Database(entities = [Alarm::class], version = 2, exportSchema = false)
+@Database(entities = [Alarm::class], version = 6, exportSchema = false)
 @TypeConverters(UUIDConverter::class, DayOfWeekSetConverter::class)
 abstract class AlarmDatabase : RoomDatabase() {
     abstract fun alarmDatabaseDao(): AlarmDatabaseDao

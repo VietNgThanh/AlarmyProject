@@ -9,9 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,140 +18,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.android.alarmy.model.Alarm
 import com.android.alarmy.utils.AppColors
 import com.android.alarmy.utils.Time
 import java.time.DayOfWeek
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-
-//@Preview
-@Composable
-fun AlarmCard(context: Context, alarm: Alarm, onDeleteAlarm: (Alarm) -> Unit, onItemClick: (String) -> Unit) {
-    val time = LocalTime.of(alarm.hour, alarm.minute)
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp)
-            .clip(shape = RoundedCornerShape(CornerSize(10.dp)))
-            .clickable {
-                onItemClick(alarm.id.toString())
-            }
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
-                )
-                Switch(checked = alarm.state,
-                    onCheckedChange = {
-                        alarm.state = !alarm.state
-                    }
-                )
-            }
-            Divider(
-                color = AppColors.Solitude,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.CameraAlt, contentDescription = null,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(end = 8.dp)
-                )
-                Text(
-                    text = Time.weekdaysToString(alarm.days),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "|",
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                )
-                Text(
-                    text = alarm.label,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(Alignment.CenterEnd),
-                ) {
-                    var expanded by remember { mutableStateOf(false) }
-                    Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = "null",
-                        modifier = Modifier.clickable { expanded = true })
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                    ) {
-                        DropdownMenuItem(onClick = {
-                            expanded = false
-                            onDeleteAlarm(alarm)
-                            Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show()
-
-                        }) {
-                            Text("Delete")
-                        }
-
-                        DropdownMenuItem(onClick = {
-                            expanded = false
-
-                        }) {
-                            Text("Preview alarm")
-                        }
-
-                        DropdownMenuItem(onClick = {
-                            expanded = false
-
-                        }) {
-                            Text("Skip next alarm")
-                        }
-
-                        DropdownMenuItem(onClick = {
-                            expanded = false
-
-                        }) {
-                            Text("Duplicate alarm")
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
-fun DayOfWeekToggleButton(dayOfWeek: DayOfWeek, state: Boolean) {
-    val checkState = remember {
-        mutableStateOf(state)
-    }
+fun DayOfWeekToggleButton(dayOfWeek: DayOfWeek, checked: Boolean, onCheck: (Boolean) -> Unit) {
+
     Button(
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (checkState.value) AppColors.DeepSkyBlue else AppColors.Periwinkle
+            backgroundColor = if (checked) AppColors.DeepSkyBlue else AppColors.Periwinkle
         ),
         shape = RoundedCornerShape(5.dp),
         onClick = {
-            checkState.value = !checkState.value
+            onCheck(!checked)
         },
         elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
         modifier = Modifier
@@ -166,6 +44,13 @@ fun DayOfWeekToggleButton(dayOfWeek: DayOfWeek, state: Boolean) {
                 color = Color.White
             )
         )
+    }
+}
+
+@Composable
+fun WeekToggleButotn(checkedList: List<Boolean>, onCheckChange: (Int, Boolean) -> Unit) {
+    (0..6).map {index ->
+        DayOfWeekToggleButton(dayOfWeek = DayOfWeek.values()[index], checked = checkedList[index], onCheck = { onCheckChange(index, it) })
     }
 }
 
@@ -214,4 +99,8 @@ fun AlarmActionCard(
 
         }
     }
+}
+
+internal fun showToast(string: String, context: Context) {
+    Toast.makeText(context, string, Toast.LENGTH_SHORT).show()
 }

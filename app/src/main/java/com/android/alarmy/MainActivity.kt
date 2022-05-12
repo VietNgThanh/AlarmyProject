@@ -22,7 +22,6 @@ import com.android.alarmy.data.viewmodel.AlarmViewModel
 import com.android.alarmy.navigation.AlarmyScreens
 import com.android.alarmy.navigation.NavigationGraph
 import com.android.alarmy.navigation.SubAlarmScreens
-import com.android.alarmy.ui.theme.AlarmyTheme
 import com.android.alarmy.utils.AppColors
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -31,9 +30,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AlarmyTheme {
+//            AlarmyTheme {
                 AlarmyApp()
-            }
+//            }
         }
     }
 }

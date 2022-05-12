@@ -8,23 +8,23 @@ import java.time.format.TextStyle
 import java.util.*
 
 object Time {
-    fun weekdaysToString(weekdays: Set<DayOfWeek?>): String {
-        if (weekdays.isEmpty()) {
-            return ""
-        }
+    fun weekdaysToString(weekdays: List<Boolean>): String {
 
-        if (weekdays.size == 7) {
-            return "Every day"
+        if (!weekdays.contains(false)) {
+            return "Hằng ngày"
         }
-
-        val weekdaysSorted = weekdaysSort(weekdays)
 
         var result = StringBuilder()
-        weekdaysSorted.forEach {
-            result.append(it?.getDisplayName(TextStyle.SHORT, Locale.US))
-            result.append(", ")
+        weekdays.forEachIndexed { index, b ->
+            if (b) {
+                result.append(boolToDay(index))
+                result.append(", ")
+            }
+
         }
-        result = result.deleteAt(result.length - 2)
+        if (result.isNotEmpty()) {
+            result = result.deleteAt(result.length - 2)
+        }
         return result.toString()
     }
 
@@ -43,5 +43,17 @@ object Time {
         return result.toSet()
     }
 
+    fun boolToDay(index: Int): String {
+        return when (index) {
+            0 -> "T.2"
+            1 -> "T.3"
+            2 -> "T.4"
+            3 -> "T.5"
+            4 -> "T.6"
+            5 -> "T.7"
+            6 -> "CN"
+            else -> ""
+        }
+    }
 }
 
