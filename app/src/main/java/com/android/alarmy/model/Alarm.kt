@@ -4,8 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.android.alarmy.utils.RandomInt
-import java.io.Serializable
-import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.util.*
 
@@ -24,7 +22,7 @@ data class Alarm(
     var minute: Int = LocalDateTime.now().minute,
 
     @ColumnInfo(name = "alarm_next_in_millis")
-    var nextAlarm: DayOfWeek? = null,
+    var nextAlarmInMillis: Long = 0L,
 
     @ColumnInfo(name = "alarm_repetitive_days")
     var days: List<Boolean> = List(7) {false},
@@ -40,4 +38,4 @@ data class Alarm(
 
     @ColumnInfo(name = "alarm_wakeup_mission")
     var wakeupMission: Mission = Mission.None,
-) : Serializable
+)

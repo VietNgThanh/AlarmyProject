@@ -34,7 +34,7 @@ object Time {
     fun timestampFromLocalDateTime(dateTime: LocalDateTime): Long =
         dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-    fun localDateTimeFromTimestamp(timestamp: Long): LocalDateTime? = LocalDateTime.ofInstant(
+    fun localDateTimeFromTimestamp(timestamp: Long): LocalDateTime = LocalDateTime.ofInstant(
         Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()
     )
 

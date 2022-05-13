@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.android.alarmy.data.viewmodel.AlarmViewModel
 import com.android.alarmy.model.Alarm
-import com.android.alarmy.screens.home.AddAlarmScreen
+import com.android.alarmy.screens.addalarm.AddAlarmScreen
 import com.android.alarmy.screens.home.HomeScreen
 import com.android.alarmy.screens.panel.PanelScreen
 import com.android.alarmy.screens.settings.SettingsScreen
@@ -47,7 +47,6 @@ fun NavigationGraph(navController: NavHostController, alarmViewModel: AlarmViewM
                     alarmViewModel.deleteAlarm(it)
                 },
             )
-            Log.d("NavigationGraph", "Triggered")
         }
 
         composable(

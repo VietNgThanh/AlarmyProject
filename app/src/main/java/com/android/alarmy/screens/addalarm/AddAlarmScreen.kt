@@ -1,4 +1,4 @@
-package com.android.alarmy.screens.home
+package com.android.alarmy.screens.addalarm
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -233,6 +233,9 @@ fun AddAlarmScreen(
 //                onSaveAlarm(alarm)
 //                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
 //
+                if (alarm.days.count { it } >= 1) {
+                    alarm.nextAlarmInMillis = alarmService.calcNextAlarmInMillis(alarm)
+                }
                 alarmService.autoSetAlarm(alarm)
 
                 onSaveAlarm(alarm)

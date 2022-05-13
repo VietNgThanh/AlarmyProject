@@ -1,5 +1,7 @@
 package com.android.alarmy
 
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.android.alarmy.components.BottomBar
@@ -22,8 +26,12 @@ import com.android.alarmy.data.viewmodel.AlarmViewModel
 import com.android.alarmy.navigation.AlarmyScreens
 import com.android.alarmy.navigation.NavigationGraph
 import com.android.alarmy.navigation.SubAlarmScreens
+import com.android.alarmy.receiver.AlarmReceiver
 import com.android.alarmy.utils.AppColors
+import com.android.alarmy.utils.Constants
 import dagger.hilt.android.AndroidEntryPoint
+
+//lateinit var alarmReceiver: AlarmReceiver
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -31,7 +39,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 //            AlarmyTheme {
-                AlarmyApp()
+            AlarmyApp()
 //            }
         }
     }
@@ -46,6 +54,11 @@ fun AlarmyApp() {
     val fabState = remember {
         mutableStateOf(FloatingActionButtonState.COLLAPSED)
     }
+//    alarmReceiver = AlarmReceiver(alarmViewModel = alarmViewModel)
+//    val filter = IntentFilter()
+//    filter.addAction(Constants.ACTION_SET_EXACT_ALARM)
+//    filter.addAction(Constants.ACTION_SET_REPETITIVE_ALARM)
+//    LocalContext.current.registerReceiver(alarmReceiver, filter)
     val fabItemList = listOf(
         FabItem(
             label = "Quick Alarm",
@@ -66,8 +79,9 @@ fun AlarmyApp() {
                 AlarmyScreens.Home.route,
                 AlarmyScreens.Record.route,
                 AlarmyScreens.Panel.route,
-                AlarmyScreens.Settings.route
-                -> BottomBar(navController = navController)
+                AlarmyScreens.Settings.route -> {
+                }
+//                -> BottomBar(navController = navController)
             }
         },
         floatingActionButton = {
@@ -81,7 +95,8 @@ fun AlarmyApp() {
                         fabItemList = fabItemList,
                         floatingActionButtonState = fabState.value,
                         onStateChange = {
-                            fabState.value = it
+//                            fabState.value = it
+                            navController.navigate(route = SubAlarmScreens.AddAlarmScreen.name)
                         }
                     )
                 }
@@ -97,6 +112,6 @@ fun AlarmyApp() {
         },
         backgroundColor = AppColors.AliceBlue
     ) {
-        NavigationGraph(navController = navController, alarmViewModel = alarmViewModel )
+        NavigationGraph(navController = navController, alarmViewModel = alarmViewModel)
     }
 }
